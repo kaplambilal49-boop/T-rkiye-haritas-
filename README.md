@@ -1,317 +1,298 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Türkiye 81 İl Haritası</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yılan Oyunu</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+        margin: 0;
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
 
-        #map { height: 100%; width: 100%; background: #e5e3df; }
+    h1 {
+        margin: 20px 0 5px;
+    }
 
-        /* Sol panel */
-        .sidebar {
-            position: absolute;
-            top: 0; left: 0;
-            width: 280px;
-            height: 100%;
-            background: rgba(255,255,255,0.97);
-            z-index: 1000;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-        .sidebar.collapsed { transform: translateX(-100%); }
+    #score {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
 
-        .sidebar-header {
-            padding: 16px;
-            background: #1a73e8;
-            color: white;
-        }
-        .sidebar-header h2 { font-size: 18px; margin-bottom: 4px; }
-        .sidebar-header p { font-size: 12px; opacity: 0.9; }
+    canvas {
+        background: #1b1b1b;
+        border: 3px solid #00ff66;
+        max-width: 95vw;
+        height: auto;
+    }
 
-        .search-box {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-        }
-        .search-box input:focus { border-color: #1a73e8; }
+    #controls {
+        margin: 20px auto;
+        width: 220px;
+        display: grid;
+        grid-template-columns: 70px 70px 70px;
+        gap: 8px;
+        justify-content: center;
+    }
 
-        .city-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 0;
-        }
-        .city-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.15s;
-        }
-        .city-item:hover { background: #f0f7ff; }
-        .city-item.active { background: #e3f2fd; font-weight: 600; color: #1a73e8; }
-        .city-item .plate {
-            background: #eee;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #555;
-        }
+    button {
+        height: 60px;
+        font-size: 25px;
+        border: none;
+        border-radius: 12px;
+        background: #222;
+        color: white;
+    }
 
-        /* Butonlar */
-        .controls {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .ctrl-btn {
-            width: 42px;
-            height: 42px;
-            background: white;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            font-size: 16px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-        }
-        .ctrl-btn:hover { background: #f5f5f5; }
+    button:active {
+        background: #00aa44;
+    }
 
-        .toggle-sidebar {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            z-index: 1001;
-            width: 42px;
-            height: 42px;
-            background: white;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            font-size: 16px;
-        }
+    #up {
+        grid-column: 2;
+    }
 
-        /* Leaflet stil düzeltmeleri */
-        .leaflet-popup-content { margin: 10px 14px; font-size: 14px; }
-        .leaflet-popup-content strong { color: #1a73e8; }
+    #left {
+        grid-column: 1;
+        grid-row: 2;
+    }
 
-        @media (max-width: 600px) {
-            .sidebar { width: 100%; }
-        }
-    </style>
+    #down {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    #right {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    #restart {
+        margin-top: 10px;
+        padding: 12px 25px;
+        font-size: 18px;
+        background: #00cc55;
+        color: white;
+    }
+</style>
 </head>
+
 <body>
 
-    <div id="map"></div>
+<h1>🐍 YILAN OYUNU</h1>
+<div id="score">Skor: 0</div>
 
-    <!-- Sol panel aç/kapa -->
-    <button class="toggle-sidebar" id="toggleSidebar" title="İl Listesi">
-        <i class="fas fa-bars"></i>
-    </button>
+<canvas id="game" width="400" height="400"></canvas>
 
-    <!-- Sol panel -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>Türkiye 81 İl</h2>
-            <p>İl seçerek haritada odaklan</p>
-        </div>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="İl ara... (ör: İstanbul)">
-        </div>
-        <div class="city-list" id="cityList"></div>
-    </div>
+<div id="controls">
+    <button id="up">⬆️</button>
+    <button id="left">⬅️</button>
+    <button id="down">⬇️</button>
+    <button id="right">➡️</button>
+</div>
 
-    <!-- Sağ kontroller -->
-    <div class="controls">
-        <button class="ctrl-btn" id="btnFullscreen" title="Tam Ekran"><i class="fas fa-expand"></i></button>
-        <button class="ctrl-btn" id="btnLocate" title="Konumumu Bul"><i class="fas fa-location-crosshairs"></i></button>
-        <button class="ctrl-btn" id="btnReset" title="Türkiye'ye Dön"><i class="fas fa-home"></i></button>
-    </div>
+<button id="restart">🔄 Yeniden Başlat</button>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // ====================== HARİTA ======================
-        const map = L.map('map', {
-            center: [39.0, 35.2],
-            zoom: 6,
-            minZoom: 5,
-            maxZoom: 18,
-            zoomControl: true
-        });
+<script>
 
-        // Katmanlar
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19
-        });
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-        const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© CARTO',
-            maxZoom: 19
-        });
+const box = 20;
 
-        const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© CARTO',
-            maxZoom: 19
-        });
+let snake;
+let food;
+let direction;
+let nextDirection;
+let score;
+let game;
 
-        osm.addTo(map);
+function startGame() {
 
-        L.control.layers({
-            "OpenStreetMap": osm,
-            "Açık Renkli": carto,
-            "Karanlık": dark
-        }, null, { position: 'bottomright' }).addTo(map);
+    snake = [
+        {x: 200, y: 200},
+        {x: 180, y: 200},
+        {x: 160, y: 200}
+    ];
 
-        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+    direction = "RIGHT";
+    nextDirection = "RIGHT";
+    score = 0;
 
-        // ====================== GEOJSON + 81 İL ======================
-        let geoLayer = null;
-        let cityData = [];
-        const highlightStyle = { weight: 3, color: '#ff9800', fillOpacity: 0.35 };
-        const normalStyle = { weight: 1.2, color: '#1565c0', fillColor: '#42a5f5', fillOpacity: 0.15 };
+    document.getElementById("score").innerText = "Skor: 0";
 
-        // GeoJSON yükle (81 il)
-        fetch('https://raw.githubusercontent.com/alpers/Turkey-Maps-GeoJSON/master/tr-cities.json')
-            .then(r => r.json())
-            .then(data => {
-                cityData = data.features.map(f => ({
-                    name: f.properties.name,
-                    number: f.properties.number,
-                    feature: f
-                })).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+    createFood();
 
-                // İl listesini doldur
-                const listEl = document.getElementById('cityList');
-                cityData.forEach(city => {
-                    const div = document.createElement('div');
-                    div.className = 'city-item';
-                    div.innerHTML = `<span>\( {city.name}</span><span class="plate"> \){String(city.number).padStart(2,'0')}</span>`;
-                    div.onclick = () => focusCity(city.name);
-                    listEl.appendChild(div);
-                });
+    clearInterval(game);
+    game = setInterval(draw, 100);
+}
 
-                // Haritaya ekle
-                geoLayer = L.geoJSON(data, {
-                    style: normalStyle,
-                    onEachFeature: (feature, layer) => {
-                        const name = feature.properties.name;
-                        const plate = feature.properties.number;
+function createFood() {
 
-                        layer.bindPopup(`<strong>${name}</strong><br>Plaka: ${String(plate).padStart(2,'0')}`);
+    food = {
+        x: Math.floor(Math.random() * (canvas.width / box)) * box,
+        y: Math.floor(Math.random() * (canvas.height / box)) * box
+    };
 
-                        layer.on({
-                            mouseover: (e) => {
-                                e.target.setStyle(highlightStyle);
-                                e.target.bringToFront();
-                            },
-                            mouseout: (e) => {
-                                geoLayer.resetStyle(e.target);
-                            },
-                            click: (e) => {
-                                map.fitBounds(e.target.getBounds(), { padding: [40, 40] });
-                            }
-                        });
-                    }
-                }).addTo(map);
-            })
-            .catch(err => {
-                console.error('GeoJSON yüklenemedi:', err);
-                alert('İl sınırları yüklenirken hata oluştu. İnternet bağlantını kontrol et.');
-            });
-
-        // ====================== FONKSİYONLAR ======================
-        function focusCity(name) {
-            if (!geoLayer) return;
-
-            let found = null;
-            geoLayer.eachLayer(layer => {
-                if (layer.feature.properties.name === name) {
-                    found = layer;
-                }
-            });
-
-            if (found) {
-                map.fitBounds(found.getBounds(), { padding: [50, 50], maxZoom: 9 });
-                found.setStyle(highlightStyle);
-                setTimeout(() => geoLayer.resetStyle(found), 2500);
-                found.openPopup();
-
-                // Listeyi güncelle
-                document.querySelectorAll('.city-item').forEach(el => {
-                    el.classList.toggle('active', el.querySelector('span').textContent === name);
-                });
-            }
+    // Yemeğin yılanın üstüne gelmesini engelle
+    for (let part of snake) {
+        if (part.x === food.x && part.y === food.y) {
+            createFood();
+            return;
         }
+    }
+}
 
-        // Arama
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const q = e.target.value.trim().toLocaleLowerCase('tr');
-            document.querySelectorAll('.city-item').forEach(el => {
-                const name = el.querySelector('span').textContent.toLocaleLowerCase('tr');
-                el.style.display = name.includes(q) ? 'flex' : 'none';
-            });
-        });
+function draw() {
 
-        // Sidebar aç/kapa
-        document.getElementById('toggleSidebar').onclick = () => {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        };
+    ctx.fillStyle = "#1b1b1b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Tam ekran
-        document.getElementById('btnFullscreen').onclick = () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        };
+    direction = nextDirection;
 
-        // Konumumu bul
-        document.getElementById('btnLocate').onclick = () => {
-            map.locate({ setView: true, maxZoom: 12 });
-        };
+    let head = {
+        x: snake[0].x,
+        y: snake[0].y
+    };
 
-        map.on('locationfound', (e) => {
-            L.marker(e.latlng).addTo(map)
-                .bindPopup('Buradasınız').openPopup();
-        });
+    if (direction === "UP") head.y -= box;
+    if (direction === "DOWN") head.y += box;
+    if (direction === "LEFT") head.x -= box;
+    if (direction === "RIGHT") head.x += box;
 
-        // Türkiye'ye dön
-        document.getElementById('btnReset').onclick = () => {
-            map.setView([39.0, 35.2], 6);
-        };
+    // Duvara çarpma
+    if (
+        head.x < 0 ||
+        head.x >= canvas.width ||
+        head.y < 0 ||
+        head.y >= canvas.height
+    ) {
+        gameOver();
+        return;
+    }
 
-        // Mobilde başlangıçta sidebar kapalı
-        if (window.innerWidth < 700) {
-            document.getElementById('sidebar').classList.add('collapsed');
+    // Kendine çarpma
+    for (let part of snake) {
+        if (head.x === part.x && head.y === part.y) {
+            gameOver();
+            return;
         }
-    </script>
+    }
+
+    snake.unshift(head);
+
+    // Yemek
+    if (head.x === food.x && head.y === food.y) {
+
+        score++;
+
+        document.getElementById("score").innerText =
+            "Skor: " + score;
+
+        createFood();
+
+    } else {
+        snake.pop();
+    }
+
+    // Yılanı çiz
+    snake.forEach((part, index) => {
+
+        ctx.fillStyle = index === 0
+            ? "#00ff66"
+            : "#00bb55";
+
+        ctx.fillRect(
+            part.x + 1,
+            part.y + 1,
+            box - 2,
+            box - 2
+        );
+    });
+
+    // Yemek çiz
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+
+    ctx.arc(
+        food.x + box / 2,
+        food.y + box / 2,
+        box / 2 - 2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+}
+
+function gameOver() {
+
+    clearInterval(game);
+
+    setTimeout(() => {
+        alert("Oyun Bitti! 🐍\nSkorun: " + score);
+    }, 100);
+}
+
+function changeDirection(newDirection) {
+
+    if (newDirection === "UP" && direction !== "DOWN")
+        nextDirection = "UP";
+
+    if (newDirection === "DOWN" && direction !== "UP")
+        nextDirection = "DOWN";
+
+    if (newDirection === "LEFT" && direction !== "RIGHT")
+        nextDirection = "LEFT";
+
+    if (newDirection === "RIGHT" && direction !== "LEFT")
+        nextDirection = "RIGHT";
+}
+
+// Klavye kontrolleri
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "ArrowUp")
+        changeDirection("UP");
+
+    if (event.key === "ArrowDown")
+        changeDirection("DOWN");
+
+    if (event.key === "ArrowLeft")
+        changeDirection("LEFT");
+
+    if (event.key === "ArrowRight")
+        changeDirection("RIGHT");
+});
+
+// Telefon kontrolleri
+document.getElementById("up").onclick =
+    () => changeDirection("UP");
+
+document.getElementById("down").onclick =
+    () => changeDirection("DOWN");
+
+document.getElementById("left").onclick =
+    () => changeDirection("LEFT");
+
+document.getElementById("right").onclick =
+    () => changeDirection("RIGHT");
+
+document.getElementById("restart").onclick =
+    () => startGame();
+
+startGame();
+
+</script>
+
 </body>
 </html>
